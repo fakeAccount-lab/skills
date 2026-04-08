@@ -130,7 +130,7 @@ find "$PROJECT_DIR" -type f \( -name "*.c" -o -name "*.h" \) -print | while IFS=
         }
     }
     ' "$file"
-} > "$TMP_FUNCTIONS"
+done > "$TMP_FUNCTIONS"
 
 TOTAL_FUNCTIONS=$(wc -l < "$TMP_FUNCTIONS")
 echo "    找到 $TOTAL_FUNCTIONS 个函数定义"

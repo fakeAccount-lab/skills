@@ -251,14 +251,13 @@ echo "[3/4] 构建符号表..."
 echo "{" > "$TMP_TABLE"
 echo '  "project_dir": "'"$PROJECT_DIR"'",' >> "$TMP_TABLE"
 echo '  "timestamp": '$(date +%s)',' >> "$TMP_TABLE"
-echo '  "variables": {' >> "$TMP_TABLE"
+echo '  "variables": [' >> "$TMP_TABLE"
 
 FIRST_VAR=true
 
 # 构建变量信息
 declare -A VAR_ALLOCATIONS
 declare -A VAR_DEALLOCATIONS
-declare -A VAR_USES
 
 # 读取内存操作
 while IFS='|' read -r op_line op_type op_code; do
@@ -285,7 +284,7 @@ while IFS='|' read -r op_line op_type op_code; do
     fi
 done < "$TMP_SYMBOLS"
 
-# 输出变量信息
+# 输出变量信息（使用数组格式以允许重复的变量名）
 while IFS='|' read -r file line var_name var_type scope lifetime is_static is_const is_extern is_pointer func_name; do
     if [ "$FIRST_VAR" = false ]; then
         echo "," >> "$TMP_TABLE"
@@ -324,7 +323,8 @@ while IFS='|' read -r file line var_name var_type scope lifetime is_static is_co
         }')
     fi
 
-    echo -n '    "'"$var_name"'": {' >> "$TMP_TABLE"
+    echo -n '    {' >> "$TMP_TABLE"
+    echo -n ' "name": "'"$var_name"'",' >> "$TMP_TABLE"
     echo -n ' "file": "'"$escaped_file"'",' >> "$TMP_TABLE"
     echo -n ' "line": '"$line"',' >> "$TMP_TABLE"
     echo -n ' "function": "'"$func_name"'",' >> "$TMP_TABLE"
@@ -342,7 +342,7 @@ while IFS='|' read -r file line var_name var_type scope lifetime is_static is_co
 done < "$TMP_VARS"
 
 echo "" >> "$TMP_TABLE"
-echo "  }," >> "$TMP_TABLE"
+echo "  ]," >> "$TMP_TABLE"
 
 # 输出统计信息
 echo '  "statistics": {' >> "$TMP_TABLE"
